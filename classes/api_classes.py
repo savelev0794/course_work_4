@@ -1,3 +1,4 @@
+"""Основной код для взаимодействия с платформами НН и SJ"""
 from classes.abc_classes import Base
 from classes.vacancy import Vacancy
 import os
@@ -14,9 +15,11 @@ class HH(Base, Vacancy):
         }
 
     def get_request(self):
+        """Отправка запроса на платформу"""
         return requests.get(self.url, params=self.params).json()
 
     def get_vacancies(self):
+        """Из полученного ответа собираем в список интересующие параметры"""
         data = self.get_request()
         vacancies = []
         for vacancy in data.get('items', []):
@@ -25,12 +28,13 @@ class HH(Base, Vacancy):
                 'name': vacancy['name'],
                 'url': vacancy['url'],
                 'salary': vacancy.get('salary')['from'],
-                'snippet': vacancy['snippet']}
+                'snippet': vacancy.get('snippet')['responsibility']}
                 vacancies.append(vacancy_dict)
         return vacancies
 
 
 class SJ(Base, Vacancy):
+    """Класса работает аналогично предыдущему с некоторыми корректировками"""
     def __init__(self, keyword, page=0):
         super().__init__(keyword, page)
         self.url: str = 'https://api.superjob.ru/2.0/vacancies/'
